@@ -1,3 +1,8 @@
-# config.py placeholder
-DATABASE_URL = "postgresql://user:password@localhost:5432/agri_db"
-REDIS_URL = "redis://localhost:6379"
+# config.py
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    database_url: str = "sqlite+aiosqlite:///./agri_mgmt.db"
+    # Add more config as needed
+
+settings = Settings()

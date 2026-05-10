@@ -1,15 +1,25 @@
-from pydantic import BaseModel
+# app/schemas/maintenance.py
+from pydantic import BaseModel, Field
 from datetime import date
 
-class MaintenanceHistoryCreate(BaseModel):
+class MaintenanceBase(BaseModel):
     machine_id: int
-    maintenance_date: str
+    maintenance_date: date
     description: str
-    cost: float
-    parts_used: list[int] | None = None
+    cost: float = 0.0
+    parts_replaced: str | None = None
 
-class MaintenanceHistoryUpdate(BaseModel):
-    maintenance_date: str | None = None
-    description: str | None = None
-    cost: float | None = None
-    parts_used: list[int] | None = None
+class MaintenanceCreate(MaintenanceBase):
+    pass
+
+class MaintenanceUpdate(MaintenanceBase):
+    pass
+
+class MaintenanceInDBBase(MaintenanceBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class Maintenance(MaintenanceInDBBase):
+    pass

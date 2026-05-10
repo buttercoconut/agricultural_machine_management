@@ -1,11 +1,24 @@
-from pydantic import BaseModel
+# app/schemas/user.py
+from pydantic import BaseModel, EmailStr
+from datetime import date
 
-class UserCreate(BaseModel):
-    name: str
-    role: str
-    contact_info: str
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
 
-class UserUpdate(BaseModel):
-    name: str | None = None
-    role: str | None = None
-    contact_info: str | None = None
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(UserBase):
+    password: str | None = None
+
+class UserInDBBase(UserBase):
+    id: int
+    hashed_password: str
+    created_at: date
+
+    class Config:
+        orm_mode = True
+
+class User(UserInDBBase):
+    pass

@@ -1,14 +1,26 @@
-from pydantic import BaseModel
+# app/schemas/rental.py
+from pydantic import BaseModel, Field
 from datetime import date
 
-class RentalCreate(BaseModel):
+class RentalBase(BaseModel):
     machine_id: int
-    renter_id: int
-    start_date: str
-    end_date: str
-    rental_fee: float
+    renter_name: str
+    start_date: date
+    end_date: date
+    daily_rate: float
 
-class RentalUpdate(BaseModel):
-    start_date: str | None = None
-    end_date: str | None = None
-    rental_fee: float | None = None
+class RentalCreate(RentalBase):
+    pass
+
+class RentalUpdate(RentalBase):
+    pass
+
+class RentalInDBBase(RentalBase):
+    id: int
+    total_cost: float
+
+    class Config:
+        orm_mode = True
+
+class Rental(RentalInDBBase):
+    pass

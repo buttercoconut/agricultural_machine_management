@@ -1,11 +1,23 @@
-from pydantic import BaseModel
+# app/schemas/part.py
+from pydantic import BaseModel, Field
 
-class PartCreate(BaseModel):
+class PartBase(BaseModel):
     name: str
-    quantity: int
-    location: str
+    description: str | None = None
+    price: float
+    stock_quantity: int = 0
 
-class PartUpdate(BaseModel):
-    name: str | None = None
-    quantity: int | None = None
-    location: str | None = None
+class PartCreate(PartBase):
+    pass
+
+class PartUpdate(PartBase):
+    pass
+
+class PartInDBBase(PartBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class Part(PartInDBBase):
+    pass
