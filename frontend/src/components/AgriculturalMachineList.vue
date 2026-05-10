@@ -1,51 +1,33 @@
 <template>
-  <div>
-    <h2>Agricultural Machine List</h2>
-    <button @click="fetchMachines">Refresh</button>
-    <table border="1" cellpadding="5" cellspacing="0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Status</th>
-          <th>Location</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="m in machines" :key="m.id">
-          <td>{{ m.id }}</td>
-          <td>{{ m.name }}</td>
-          <td>{{ m.type }}</td>
-          <td>{{ m.status }}</td>
-          <td>{{ m.location }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="container">
+    <h1>농업기계 관리 시스템</h1>
+    <nav class="nav">
+      <router-link to="/machines">기계 목록</router-link>
+      <router-link to="/maintenance">유지보수</router-link>
+      <router-link to="/parts">부품 관리</router-link>
+      <router-link to="/rentals">임대 관리</router-link>
+    </nav>
+    <router-view />
   </div>
 </template>
 
-<script>
-import axios from 'axios';
-export default {
-  name: 'AgriculturalMachineList',
-  data() {
-    return {
-      machines: [],
-    };
-  },
-  methods: {
-    async fetchMachines() {
-      const res = await axios.get('/api/agricultural_machine');
-      this.machines = res.data;
-    },
-  },
-  mounted() {
-    this.fetchMachines();
-  },
-};
+<script setup>
+// No additional logic needed for the root component
 </script>
 
 <style scoped>
-/* Add any component-specific styles here */
+.container {
+  padding: 20px;
+}
+.nav {
+  margin-bottom: 20px;
+}
+.nav a {
+  margin-right: 15px;
+  text-decoration: none;
+  color: #42b983;
+}
+.nav a.router-link-exact-active {
+  font-weight: bold;
+}
 </style>

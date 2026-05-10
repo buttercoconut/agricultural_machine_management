@@ -1,23 +1,11 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
-  </div>
+  <router-view />
 </template>
 
-<script>
-export default {
-  name: 'App',
-};
+<script setup>
+// Root component
 </script>
 
 <style>
-/* Global styles */
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-#app {
-  padding: 20px;
-}
+/* Global styles can be added here */
 </style>

@@ -1,51 +1,60 @@
 <template>
   <div>
-    <h2>Maintenance History</h2>
-    <button @click="fetchMaintenances">Refresh</button>
-    <table border="1" cellpadding="5" cellspacing="0">
+    <h2>농업기계 목록</h2>
+    <table>
       <thead>
         <tr>
           <th>ID</th>
-          <th>Machine ID</th>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Cost</th>
+          <th>모델명</th>
+          <th>제조사</th>
+          <th>구매일자</th>
+          <th>시운전 시간</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="m in maintenances" :key="m.id">
-          <td>{{ m.id }}</td>
-          <td>{{ m.machine_id }}</td>
-          <td>{{ m.maintenance_date }}</td>
-          <td>{{ m.description }}</td>
-          <td>{{ m.cost }}</td>
+        <tr v-for="machine in machines" :key="machine.id">
+          <td>{{ machine.id }}</td>
+          <td>{{ machine.model_name }}</td>
+          <td>{{ machine.manufacturer }}</td>
+          <td>{{ machine.purchase_date }}</td>
+          <td>{{ machine.test_run_hours }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
 
-<script>
-import axios from 'axios';
-export default {
-  name: 'MaintenanceHistory',
-  data() {
-    return {
-      maintenances: [],
-    };
-  },
-  methods: {
-    async fetchMaintenances() {
-      const res = await axios.get('/api/maintenance');
-      this.maintenances = res.data;
-    },
-  },
-  mounted() {
-    this.fetchMaintenances();
-  },
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const machines = ref([]);
+const router = useRouter();
+
+const fetchMachines = async () => {
+  try {
+    const response = await router.app.config.globalProperties.$axios.get('/agricultural_machines');
+    machines.value = response.data;
+  } catch (error) {
+    console.error('Error fetching machines:', error);
+  }
 };
+
+onMounted(() => {
+  fetchMachines();
+});
 </script>
 
 <style scoped>
-/* Add any component-specific styles here */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+th {
+  background-color: #f2f2f2;
+}
 </style>

@@ -1,12 +1,11 @@
-# app/main.py
+# main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.agricultural_machine import router as machine_router
-from app.api.maintenance import router as maintenance_router
-from app.api.part import router as part_router
-from app.api.rental import router as rental_router
-from app.api.user import router as user_router
+from .config import settings
+from .database import engine, async_session
+from .models.agricultural_machine import Base as MachineBase
+from .api.agricultural_machine import router as machine_router
 
 app = FastAPI(title="Agricultural Machine Management API")
 
@@ -18,8 +17,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(machine_router, prefix="/machines", tags=["machines"])
-app.include_router(maintenance_router, prefix="/maintenances", tags=["maintenances"])
-app.include_router(part_router, prefix="/parts", tags=["parts"])
-app.include_router(rental_router, prefix="/rentals", tags=["rentals"])
-app.include_router(user_router, prefix="/users", tags=["users"])
+app.include_router(machine_router)
+
+@app.on_event("startup")
+async def on_startup():
+    # Create tables if they don't exist
+    async with engine.begin() as conn:
+        await conn.run_sync(MachineBase.metadata.create_all)
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Agricultural Machine Management API"}

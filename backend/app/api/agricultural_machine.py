@@ -1,44 +1,40 @@
-# app/api/agricultural_machine.py
+# api/agricultural_machine.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import update, delete
 
-from app.models.agricultural_machine import AgriculturalMachine
-from app.schemas.agricultural_machine import (
+from ..models.agricultural_machine import AgriculturalMachine
+from ..schemas.agricultural_machine import (
     AgriculturalMachineCreate,
     AgriculturalMachineUpdate,
     AgriculturalMachine,
 )
-from app.database import get_db
+from ..config import settings
+from ..database import get_async_session
 
-router = APIRouter()
+router = APIRouter(prefix="/machines", tags=["AgriculturalMachine"])
 
 @router.post("/", response_model=AgriculturalMachine, status_code=status.HTTP_201_CREATED)
 async def create_machine(
-    machine: AgriculturalMachineCreate,
-    db: AsyncSession = Depends(get_db),
+    machine_in: AgriculturalMachineCreate,
+    db: AsyncSession = Depends(get_async_session),
 ):
-    db_machine = AgriculturalMachine(**machine.dict())
-    db.add(db_machine)
-    try:
-        await db.commit()
-        await db.refresh(db_machine)
-    except IntegrityError:
-        await db.rollback()
-        raise HTTPException(status_code=400, detail="Machine already exists")
-    return db_machine
+    machine = AgriculturalMachine(**machine_in.dict())
+    db.add(machine)
+    await db.commit()
+    await db.refresh(machine)
+    return machine
 
 @router.get("/", response_model=list[AgriculturalMachine])
-async def read_machines(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(AgriculturalMachine).offset(skip).limit(limit))
+async def list_machines(db: AsyncSession = Depends(get_async_session)):
+    result = await db.execute(select(AgriculturalMachine))
     machines = result.scalars().all()
     return machines
 
 @router.get("/{machine_id}", response_model=AgriculturalMachine)
-async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(AgriculturalMachine).where(AgriculturalMachine.id == machine_id))
-    machine = result.scalar_one_or_none()
+async def get_machine(machine_id: int, db: AsyncSession = Depends(get_async_session)):
+    machine = await db.get(AgriculturalMachine, machine_id)
     if not machine:
         raise HTTPException(status_code=404, detail="Machine not found")
     return machine
@@ -46,23 +42,22 @@ async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
 @router.put("/{machine_id}", response_model=AgriculturalMachine)
 async def update_machine(
     machine_id: int,
-    machine_update: AgriculturalMachineUpdate,
-    db: AsyncSession = Depends(get_db),
+    machine_in: AgriculturalMachineUpdate,
+    db: AsyncSession = Depends(get_async_session),
 ):
-    result = await db.execute(select(AgriculturalMachine).where(AgriculturalMachine.id == machine_id))
-    machine = result.scalar_one_or_none()
+    machine = await db.get(AgriculturalMachine, machine_id)
     if not machine:
         raise HTTPException(status_code=404, detail="Machine not found")
-    for key, value in machine_update.dict(exclude_unset=True).items():
-        setattr(machine, key, value)
+    for var, value in machine_in.dict(exclude_unset=True).items():
+        setattr(machine, var, value)
+    db.add(machine)
     await db.commit()
     await db.refresh(machine)
     return machine
 
 @router.delete("/{machine_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(AgriculturalMachine).where(AgriculturalMachine.id == machine_id))
-    machine = result.scalar_one_or_none()
+async def delete_machine(machine_id: int, db: AsyncSession = Depends(get_async_session)):
+    machine = await db.get(AgriculturalMachine, machine_id)
     if not machine:
         raise HTTPException(status_code=404, detail="Machine not found")
     await db.delete(machine)

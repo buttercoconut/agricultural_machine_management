@@ -1,12 +1,12 @@
-# app/schemas/agricultural_machine.py
-from pydantic import BaseModel, Field
+# schemas/agricultural_machine.py
 from datetime import date
+from pydantic import BaseModel, Field
 
 class AgriculturalMachineBase(BaseModel):
-    model_name: str
-    manufacturer: str
+    model_name: str = Field(..., max_length=100)
+    manufacturer: str = Field(..., max_length=100)
     purchase_date: date
-    commissioning_hours: float = 0.0
+    commissioning_time: float | None = None
 
 class AgriculturalMachineCreate(AgriculturalMachineBase):
     pass
